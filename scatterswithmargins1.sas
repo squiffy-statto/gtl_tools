@@ -254,7 +254,7 @@ proc template;
         columnweights   = (.78 .22);
 
         *** GREY LINE TO SEPERATE MARGIN PLOTS FROM SCATTER ***;
-        drawline x1 = 0 y1 = 76 x2 = 100 y2 = 76 /
+        drawline x1 = 0 y1 = 77 x2 = 100 y2 = 77 /
          x1space=layoutpercent y1space=layoutpercent x2space=layoutpercent y2space=layoutpercent
          lineattrs=GraphReference layer=front lineattrs=(color = greyaa thickness=1);
         drawline x1 = 77 y1 = 0 x2 = 77 y2 = 100 /
