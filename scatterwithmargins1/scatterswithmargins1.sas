@@ -27,7 +27,7 @@
 |
 ********************************************************************************/;
 
-%macro scatterwithmargins_v1(
+%macro scatterwithmargins1(
   indata   = ,                    /*** DATASET WITH RAW VALUES IN ***/
   inwhere  = ,                    /*** ALLOWS A WHERE CLAUSE ON DATA GOING IN ***/
   xvars    = ,                    /*** COMMA SEP LIST OF VARIABLE FOR XAXIS (MUST BE SAME TYPE) ***/
@@ -51,6 +51,7 @@
   pfoot1   = ,                    /*** FOOTNOTE1 FOR PLOT IMAGE ***/
   pfoot2   = ,                    /*** FOOTNOTE2 FOR PLOT IMAGE ***/
   pname    = plot1                /*** IMAGE NAME FOR PLOT ***/
+  pstyle   = listing
 );
 
 %********************************************************************************;
@@ -200,24 +201,6 @@ run;
 *** SET UP GTL TEMPLATE ***;
 proc template;
 
-
-  ***  MODIFY THE ODS JOURNAL STYLE FOR USE WITH PLOT ***;
-  define Style ScatterWithMarginsStyle; parent = styles.journal;
-
-    style graphwalls from graphwalls / 
-      frameborder=on linestyle=1 linethickness=2px 
-      backgroundcolor=GraphColors("gwalls") contrastcolor=white;
-
-    style GraphFonts from GraphFonts "Fonts used in graph styles" / 
-      'GraphTitleFont'    = (", ",10pt,bold)
-      'GraphFootnoteFont' = (", ",8pt)
-      'GraphLabelFont'    = (", ",8pt) 
-      'GraphValueFont'    = (", ",7pt)
-      'GraphDataFont'     = (", ",7pt);
-
-  end;
-
-
   *** CREATE GRAPH TEMPLATE ***;
   define statgraph ScatterWithMargins;
 
@@ -279,7 +262,7 @@ proc template;
             %end;
           else 
             %do ii = 1 %to &dim.;
-            histogram &&xvar&ii. / binaxis=false fillattrs=(color=&&color&ii.) outlineattrs=(color=black) datatransparency = FADE;
+            histogram &&xvar&ii. / binaxis=false fillattrs=(color=&&color&ii.) outlineattrs=(color=&&color&ii.) datatransparency = FADE;
             densityplot &&xvar&ii. / kernel(c=0.8) lineattrs=(color=black pattern=1);
             %end;
             %do ii = 1 %to &xrefsn.;
@@ -294,10 +277,10 @@ proc template;
           order  = columnmajor 
           border = false;  
           %do ii = 1 %to &dim.; 
-          entry halign=left "N&ii."  / textattrs=( size = 10pt );
+          entry halign=left "N&ii."  / textattrs=( size = graphlabelfont:size );
           %end;
           %do ii = 1 %to &dim.; 
-          entry halign=left  "= " eval(strip(put(sum(_count_ ne .),8.0))) / textattrs=( size = 10pt );
+          entry halign=left  "= " eval(strip(put(sum(_count_ ne .),8.0))) / textattrs=( size = graphlabelfont:size );
           %end;
         endlayout;
 
@@ -385,7 +368,7 @@ proc template;
             %end;
           else 
             %do ii = 1 %to &dim.;
-            histogram &&yvar&ii. / orient=horizontal binaxis=false fillattrs=(color=&&color&ii.) outlineattrs=(color=black) datatransparency = FADE;
+            histogram &&yvar&ii. / orient=horizontal binaxis=false fillattrs=(color=&&color&ii.) outlineattrs=(color=&&color&ii.) datatransparency = FADE;
             densityplot &&yvar&ii. / orient=horizontal kernel(c=0.8) lineattrs=(color=black pattern=1);
             %end;
             %do ii = 1 %to &yrefsn.;
@@ -445,7 +428,6 @@ proc template;
     imagefmt     = png;
 
   *** CREATE SG RENDER ***;
-  ods listing style = ScatterWithMarginsStyle;
   proc sgrender data     = w_scatterwithmargins 
                 template = ScatterWithMargins;  
   dynamic XTYPE    = "&xtype."
@@ -466,7 +448,6 @@ proc template;
           ;
   run;
   ods graphics off;
-  ods listing style = listing;
 
 
 %********************************************************************************;
@@ -497,7 +478,7 @@ quit;
 /**/
 /*options nomprint;*/
 /*ods html;*/
-/*%scatterwithmargins_v1*/
+/*%scatterwithmargins1*/
 /* (indata  = class                    */
 /* ,xvars   = %str(sexn, sexn)                    */
 /* ,xtype   = DISC                    */

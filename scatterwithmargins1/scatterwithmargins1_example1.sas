@@ -8,11 +8,11 @@
 
 *** INCLUDE MVN TOOLS CODE ***;
 options source2;
-filename mvd url "https://mygithub.gsk.com/raw/tad66240/mvd_tools/master/mvd_tools.sas?token=AAAAtLfNkLxphIWCopzRECC4siF2oPV3ks5chqLSwA%3D%3D";
+filename mvd "C:\Users\tad66240\OneDrive - GSK\statistics\repositories\sas\mvd_tools\mvd_tools.sas";
 %include mvd;
 
 *** INCLUDE GTL TOOLS CODE ***;
-filename gtl url "https://mygithub.gsk.com/raw/tad66240/gtl_tools/master/scatterswithmargins1.sas?token=AAAAtMjL2v0Cj89yjMNtnjLrHoq2Jr-xks5chqXiwA%3D%3D";
+filename gtl "C:\Users\tad66240\OneDrive - GSK\statistics\repositories\sas\gtl_tools\scatterwithmargins1\scatterswithmargins1.sas";
 %include gtl;
 
 
@@ -34,10 +34,24 @@ data mvn_data;
    end;
 run;
 
+***  MODIFY THE ODS JOURNAL STYLE FOR USE WITH PLOT ***;
+proc template;
+  define Style scatterstyle; 
+    parent = styles.journal;
+    style GraphFonts from GraphFonts "Fonts used in graph styles" / 
+      'GraphTitleFont'    = (", ",16pt,bold)
+      'GraphFootnoteFont' = (", ",8pt)
+      'GraphLabelFont'    = (", ",14pt) 
+      'GraphValueFont'    = (", ",14pt)
+      'GraphDataFont'     = (", ",14pt);
+  end;
+run;
+
 *** CREATE HTML PLOT ***;
 options nomprint;
-ods html;
-%scatterwithmargins_v1
+ods listing close;
+ods html style = scatterstyle;
+%scatterwithmargins1
  (indata  = mvn_data                    
  ,xvars   = %str(y1_t1, y1_t2)                    
  ,xtype   = CONT                    
@@ -61,6 +75,7 @@ ods html;
  ,pname   = scatterwithmargins1_example1                
 );
 ods html close;
+ods listing;
 
 *** DELETE WORK DATASETS ***;
 proc datasets lib = work noprint;
